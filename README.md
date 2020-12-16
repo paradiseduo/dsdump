@@ -7,6 +7,8 @@ Because of the original project does not support outputting the results directly
 
 Use it like this:
 ```bash
+> git clone https://github.com/paradiseduo/dsdump.git
+> cd dsdump
 > python3 dsdump.py -i ~/Downloads/Payload/xxx.app/xxx -o ~/Desktop/classes
 /Users/x/Desktop/classes/NSObject.h
 /Users/x/Desktop/classes/XMIAudioPlayerListProtocol.h
