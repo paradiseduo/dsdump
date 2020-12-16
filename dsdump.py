@@ -36,7 +36,7 @@ def main(argv):
 
 
 def dumpObjectiveC(inputfile, outputfile):
-    strline = "./dsdump --objc --verbose=5 '" + inputfile + "'"
+    strline = './dsdump --objc --verbose=5 "' + inputfile + '"'
     p = subprocess.Popen(strline, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out = p.communicate()[0].decode('utf-8', 'ignore')
     arr = out.split('\n\n\n')
@@ -94,7 +94,7 @@ def dumpObjectiveC(inputfile, outputfile):
 
 
 def dumpSwift(inputfile, outputfile):
-    strline = "./dsdump --swift --verbose=5 '" + inputfile + "'"
+    strline = './dsdump --swift --verbose=5 "' + inputfile + '"'
     p = subprocess.Popen(strline, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out = p.communicate()[0].decode('utf-8', 'ignore')
     arr = out.split('\n')
