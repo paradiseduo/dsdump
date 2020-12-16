@@ -1,11 +1,11 @@
 # dsdump
 An improved nm + objc/swift class-dump ([writeup](https://derekselander.github.io/dsdump/))
 
-based on [DerekSelander/dsdump](https://github.com/DerekSelander/dsdump)
+Based on [DerekSelander/dsdump](https://github.com/DerekSelander/dsdump)
 
-Because of the original project does not support outputting the results directly to a file, I use Python to output the scan results to files.
+Because of the original project does not support outputting the results directly to files, So I use Python to output the scan results to files.
 
-You could use it like this:
+Use it like this:
 ```bash
 > python3 dsdump.py -i ~/Downloads/Payload/xxx.app/xxx -o ~/Desktop/classes
 /Users/x/Desktop/classes/NSObject.h
