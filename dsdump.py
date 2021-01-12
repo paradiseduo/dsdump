@@ -5,18 +5,28 @@ import sys
 import getopt
 import subprocess
 
+print('''
+    .         .                   
+    |         |                    {Version: 1.0}
+ .-.| .--. .-.| .  . .--.--. .,-. 
+(   | `--.(   | |  | |  |  | |   )
+ `-'`-`--' `-'`-`--`-'  '  `-|`-' 
+                             |    
+                             '   
+''')
+
 def main(argv):
     inputfile = ''
     outputfile = ''
     try:
         opts, args = getopt.getopt(argv, "hi:o:", ["ifile=", "ofile="])
     except getopt.GetoptError:
-        print('dsdump.py \n -i <inputfile> \n -o <outputfile>')
+        print('python3 dsdump.py \n -i <inputfile> \n -o <outputfile>')
         sys.exit(2)
     
     for (opt, arg) in opts:
         if opt == '-h':
-            print('dsdump.py \n -i <inputfile> \n -o <outputfile>')
+            print('python3 dsdump.py \n -i <inputfile> \n -o <outputfile>')
             sys.exit(1)
         elif opt in ("-i", "--ifile"):
             inputfile = arg
@@ -31,7 +41,7 @@ def main(argv):
         dumpObjectiveC(inputfile, outputfile)
         dumpSwift(inputfile, outputfile)
     else:
-        print('dsdump.py \n -i <inputfile> \n -o <outputfile>')
+        print('python3 dsdump.py \n -i <inputfile> \n -o <outputfile>')
         sys.exit(2)
 
 
