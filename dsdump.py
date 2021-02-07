@@ -7,7 +7,7 @@ import subprocess
 
 print('''
     .         .                   
-    |         |                    {Version: 1.0}
+    |         |                    {Version: 1.1}
  .-.| .--. .-.| .  . .--.--. .,-. 
 (   | `--.(   | |  | |  |  | |   )
  `-'`-`--' `-'`-`--`-'  '  `-|`-' 
@@ -18,35 +18,41 @@ print('''
 def main(argv):
     inputfile = ''
     outputfile = ''
+    arches = 'arm64'
     try:
-        opts, args = getopt.getopt(argv, "hi:o:", ["ifile=", "ofile="])
+        opts, args = getopt.getopt(argv, "hi:o:a:", ["ifile=", "ofile=", "arches="])
     except getopt.GetoptError:
-        print('python3 dsdump.py \n -i <inputfile> \n -o <outputfile>')
-        sys.exit(2)
+        print('python3 dsdump.py \n -i <inputfile> \n -o <outputfile> \n -a [ arm64 | armv7 ]')
+        sys.exit(0)
     
     for (opt, arg) in opts:
         if opt == '-h':
-            print('python3 dsdump.py \n -i <inputfile> \n -o <outputfile>')
+            print('python3 dsdump.py \n -i <inputfile> \n -o <outputfile> \n -a [ arm64 | armv7 ]')
             sys.exit(1)
         elif opt in ("-i", "--ifile"):
             inputfile = arg
         elif opt in ("-o", "--ofile"):
             outputfile = arg
+        elif opt in ("-a", "--arches"):
+            arches = arg
+            if arches != 'arm64' and arches != 'armv7':
+                print('python3 dsdump.py \n -i <inputfile> \n -o <outputfile> \n -a [ arm64 | armv7 ]')
+                sys.exit(1)
 
     if os.path.isfile(inputfile) and outputfile != '':
         if outputfile.endswith('/'):
             outputfile[:-1]
         if not os.path.exists(outputfile):
             os.mkdir(outputfile)
-        dumpObjectiveC(inputfile, outputfile)
-        dumpSwift(inputfile, outputfile)
+        dumpObjectiveC(inputfile, outputfile, arches)
+        dumpSwift(inputfile, outputfile, arches)
     else:
-        print('python3 dsdump.py \n -i <inputfile> \n -o <outputfile>')
+        print('python3 dsdump.py \n -i <inputfile> \n -o <outputfile> \n -a [ arm64 | armv7 ]')
         sys.exit(2)
 
 
-def dumpObjectiveC(inputfile, outputfile):
-    strline = './dsdump --objc --verbose=5 "' + inputfile + '"'
+def dumpObjectiveC(inputfile, outputfile, arches):
+    strline = './dsdump -a '+ arches +' --objc --verbose=5 "' + inputfile + '"'
     p = subprocess.Popen(strline, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out = p.communicate()[0].decode('utf-8', 'ignore')
     arr = out.split('\n\n\n')
@@ -103,8 +109,8 @@ def dumpObjectiveC(inputfile, outputfile):
                     f.write(result)
 
 
-def dumpSwift(inputfile, outputfile):
-    strline = './dsdump --swift --verbose=5 "' + inputfile + '"'
+def dumpSwift(inputfile, outputfile, arches):
+    strline = './dsdump -a '+ arches +' --swift --verbose=5 "' + inputfile + '"'
     p = subprocess.Popen(strline, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out = p.communicate()[0].decode('utf-8', 'ignore')
     arr = out.split('\n')
