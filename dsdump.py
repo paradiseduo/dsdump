@@ -156,7 +156,7 @@ def swiftDemangle(className):
     if className.startswith('_'):
         if '(' in className and ')' in className:
             className = className.split('(')[0]
-        p = subprocess.Popen('xcrun swift-demangle --compact '+className, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p = subprocess.Popen('xcrun swift-demangle --simplified --compact '+className, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out = p.communicate()[0].decode('utf-8', 'ignore').strip()
         if len(out) > 2:
             return out
