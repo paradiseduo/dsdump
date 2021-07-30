@@ -9,6 +9,21 @@ Use it like this:
 ```bash
 > git clone https://github.com/paradiseduo/dsdump.git
 > cd dsdump
+> python3 dsdump.py
+
+    .         .
+    |         |                    {Version: 2.0}
+ .-.| .--. .-.| .  . .--.--. .,-.
+(   | `--.(   | |  | |  |  | |   )
+ `-'`-`--' `-'`-`--`-'  '  `-|`-'
+                             |
+                             '
+
+python3 dsdump.py
+ -i <inputfile>
+ -o <outputfile>
+ -a [ arm64 | armv7 ]
+ -d
 > python3 dsdump.py -i ~/Downloads/Payload/xxx.app/xxx -o ~/Desktop/classes
 /Users/x/Desktop/classes/NSObject.h
 /Users/x/Desktop/classes/XMIAudioPlayerListProtocol.h
@@ -41,3 +56,6 @@ Use it like this:
 	0x10037243c  func <stripped> // modifyCoroutine
  }%
 ```
+
+If you want to better view the class name of swift, you can use -d option.
+But -d option will slow down dsdump speed.
