@@ -83,8 +83,8 @@ def dumpObjectiveC(inputfile, outputfile, arches, demangle):
                     className = out
             fileName = outputfile + '/' + className + '.h'
             print(fileName)
-            with open(fileName, mode='w') as f:
-                f.write('\n'.join(protocols[start:(end + 1)]))
+            with open(fileName, mode='a') as f:
+                f.write('\n'.join(protocols[start:(end + 1)])+'\n')
                 start = -1
                 end = -1
     # 输出classes
@@ -147,7 +147,7 @@ def dumpSwift(inputfile, outputfile, arches, demangle):
             end = i
         if start != -1 and end != -1:
             print(fileName)
-            with open(fileName, mode='a+') as f:
+            with open(fileName, mode='a') as f:
                 f.write('\n'.join(arr[start:end+1])+'\n')
             start = -1
             end = -1
