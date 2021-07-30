@@ -7,7 +7,7 @@ import subprocess
 
 print('''
     .         .                   
-    |         |                    {Version: 1.1}
+    |         |                    {Version: 2.0}
  .-.| .--. .-.| .  . .--.--. .,-. 
 (   | `--.(   | |  | |  |  | |   )
  `-'`-`--' `-'`-`--`-'  '  `-|`-' 
@@ -15,19 +15,22 @@ print('''
                              '   
 ''')
 
+howToUse = 'python3 dsdump.py \n -i <inputfile> \n -o <outputfile> \n -a [ arm64 | armv7 ] \n -d'
+
 def main(argv):
     inputfile = ''
     outputfile = ''
     arches = 'arm64'
+    demangle = False
     try:
-        opts, args = getopt.getopt(argv, "hi:o:a:", ["ifile=", "ofile=", "arches="])
+        opts, args = getopt.getopt(argv, "hi:o:a:d", ["ifile=", "ofile=", "arches=", "demangle"])
     except getopt.GetoptError:
-        print('python3 dsdump.py \n -i <inputfile> \n -o <outputfile> \n -a [ arm64 | armv7 ]')
+        print('')
         sys.exit(0)
     
     for (opt, arg) in opts:
         if opt == '-h':
-            print('python3 dsdump.py \n -i <inputfile> \n -o <outputfile> \n -a [ arm64 | armv7 ]')
+            print(howToUse)
             sys.exit(1)
         elif opt in ("-i", "--ifile"):
             inputfile = arg
@@ -36,22 +39,24 @@ def main(argv):
         elif opt in ("-a", "--arches"):
             arches = arg
             if arches != 'arm64' and arches != 'armv7':
-                print('python3 dsdump.py \n -i <inputfile> \n -o <outputfile> \n -a [ arm64 | armv7 ]')
+                print(howToUse)
                 sys.exit(1)
+        elif opt in ("-d", "--demangle"):
+            demangle = True
 
     if os.path.isfile(inputfile) and outputfile != '':
         if outputfile.endswith('/'):
             outputfile[:-1]
         if not os.path.exists(outputfile):
             os.mkdir(outputfile)
-        dumpObjectiveC(inputfile, outputfile, arches)
-        dumpSwift(inputfile, outputfile, arches)
+        dumpObjectiveC(inputfile, outputfile, arches, demangle)
+        dumpSwift(inputfile, outputfile, arches, demangle)
     else:
-        print('python3 dsdump.py \n -i <inputfile> \n -o <outputfile> \n -a [ arm64 | armv7 ]')
+        print(howToUse)
         sys.exit(2)
 
 
-def dumpObjectiveC(inputfile, outputfile, arches):
+def dumpObjectiveC(inputfile, outputfile, arches, demangle):
     strline = './dsdump -a '+ arches +' --objc --verbose=5 "' + inputfile + '"'
     p = subprocess.Popen(strline, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out = p.communicate()[0].decode('utf-8', 'ignore')
@@ -72,6 +77,10 @@ def dumpObjectiveC(inputfile, outputfile, arches):
         if '@end' in line:
             end = i
         if start != -1 and end != -1:
+            if demangle:
+                out = swiftDemangle(className)
+                if out != className:
+                    className = out
             fileName = outputfile + '/' + className + '.h'
             print(fileName)
             with open(fileName, mode='w') as f:
@@ -83,6 +92,10 @@ def dumpObjectiveC(inputfile, outputfile, arches):
     classes.append(last)
     for line in classes:
         className = line.split(' ')[1]
+        if demangle:
+            out = swiftDemangle(className)
+            if out != className:
+                className = out
         fileName = outputfile + '/' + className + '.h'
         print(fileName)
         with open(fileName, mode='w') as f:
@@ -96,6 +109,10 @@ def dumpObjectiveC(inputfile, outputfile, arches):
         else:
             if line.startswith('0x'):
                 className = str(line).split(' ')[1]
+                if demangle:
+                    out = swiftDemangle(className)
+                    if out != className:
+                        className = out
                 fileName = outputfile + '/' + className + '.h'
                 result = line + '\n'
                 for j in range(i + 1, count):
@@ -109,7 +126,7 @@ def dumpObjectiveC(inputfile, outputfile, arches):
                     f.write(result)
 
 
-def dumpSwift(inputfile, outputfile, arches):
+def dumpSwift(inputfile, outputfile, arches, demangle):
     strline = './dsdump -a '+ arches +' --swift --verbose=5 "' + inputfile + '"'
     p = subprocess.Popen(strline, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out = p.communicate()[0].decode('utf-8', 'ignore')
@@ -130,10 +147,20 @@ def dumpSwift(inputfile, outputfile, arches):
             end = i
         if start != -1 and end != -1:
             print(fileName)
-            with open(fileName, mode='w') as f:
-                f.write('\n'.join(arr[start:end+1]))
+            with open(fileName, mode='a+') as f:
+                f.write('\n'.join(arr[start:end+1])+'\n')
             start = -1
             end = -1
+
+def swiftDemangle(className):
+    if className.startswith('_'):
+        if '(' in className and ')' in className:
+            className = className.split('(')[0]
+        p = subprocess.Popen('xcrun swift-demangle '+className, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out = p.communicate()[0].decode('utf-8', 'ignore').strip().split('--->')[-1].strip()
+        if len(out) > 2:
+            return out
+    return className
 
 
 if __name__ == "__main__":
