@@ -5,7 +5,8 @@ Based on [DerekSelander/dsdump](https://github.com/DerekSelander/dsdump)
 
 Because of the original project does not support outputting the results directly to files, So I use Python to output the scan results to files.
 
-Use it like this:
+Use it like this (**If you want to better view the class name of swift, you can use -d option.
+But -d option will slow down dsdump speed.**):
 ```bash
 > git clone https://github.com/paradiseduo/dsdump.git
 > cd dsdump
@@ -56,6 +57,3 @@ python3 dsdump.py
 	0x10037243c  func <stripped> // modifyCoroutine
  }%
 ```
-
-If you want to better view the class name of swift, you can use -d option.
-But -d option will slow down dsdump speed.
