@@ -57,3 +57,9 @@ python3 dsdump.py
 	0x10037243c  func <stripped> // modifyCoroutine
  }%
 ```
+
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/paradiseduo/dsdump.svg)](https://starchart.cc/paradiseduo/dsdump)
+
