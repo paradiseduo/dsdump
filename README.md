@@ -1,4 +1,6 @@
 # dsdump
+Now you can use [resymbol](https://github.com/paradiseduo/resymbol) replace this tool.
+
 An improved nm + objc/swift class-dump ([writeup](https://derekselander.github.io/dsdump/))
 
 Based on [DerekSelander/dsdump](https://github.com/DerekSelander/dsdump)
