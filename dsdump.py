@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import os
-import sys
 import getopt
+import os
 import subprocess
+import sys
 
 print('''
     .         .                   
@@ -17,6 +17,7 @@ print('''
 
 howToUse = 'python3 dsdump.py \n -i <inputfile> \n -o <outputfile> \n -a [ arm64 | armv7 ] \n -d'
 
+
 def main(argv):
     inputfile = ''
     outputfile = ''
@@ -27,7 +28,7 @@ def main(argv):
     except getopt.GetoptError:
         print('')
         sys.exit(0)
-    
+
     for (opt, arg) in opts:
         if opt == '-h':
             print(howToUse)
@@ -38,7 +39,7 @@ def main(argv):
             outputfile = arg
         elif opt in ("-a", "--arches"):
             arches = arg
-            if arches != 'arm64' and arches != 'armv7':
+            if arches not in ['arm64', 'armv7']:
                 print(howToUse)
                 sys.exit(1)
         elif opt in ("-d", "--demangle"):
@@ -57,19 +58,19 @@ def main(argv):
 
 
 def dumpObjectiveC(inputfile, outputfile, arches, demangle):
-    strline = './dsdump -a '+ arches +' --objc --verbose=5 "' + inputfile + '"'
+    strline = f'./dsdump -a {arches} --objc --verbose=5 "{inputfile}"'
     p = subprocess.Popen(strline, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out = p.communicate()[0].decode('utf-8', 'ignore')
     arr = out.split('\n\n\n')
     # 分割输出内容
     protocols = arr[0].split('\n')
-    classes = arr[1:len(arr) - 1]
+    classes = arr[1:-1]
     categares = arr[-1].split('\n')
     # 输出protocols
     start = -1
     end = -1
     className = ''
-    for i in range(0, len(protocols)):
+    for i in range(len(protocols)):
         line = protocols[i]
         if '@protocol' in line:
             start = i
@@ -81,10 +82,10 @@ def dumpObjectiveC(inputfile, outputfile, arches, demangle):
                 out = swiftDemangle(className)
                 if out != className:
                     className = out
-            fileName = outputfile + '/' + className + '.h'
+            fileName = f'{outputfile}/{className}.h'
             print(fileName)
             with open(fileName, mode='a') as f:
-                f.write('\n'.join(protocols[start:(end + 1)])+'\n')
+                f.write('\n'.join(protocols[start:(end + 1)]) + '\n')
                 start = -1
                 end = -1
     # 输出classes
@@ -96,38 +97,37 @@ def dumpObjectiveC(inputfile, outputfile, arches, demangle):
             out = swiftDemangle(className)
             if out != className:
                 className = out
-        fileName = outputfile + '/' + className + '.h'
+        fileName = f'{outputfile}/{className}.h'
         print(fileName)
         with open(fileName, mode='w') as f:
             f.write(line)
     # 输出categares
     count = len(categares)
-    for i in range(0, count):
+    for i in range(count):
         line = categares[i]
         if line.startswith('0x00000000000'):
             continue
-        else:
-            if line.startswith('0x'):
-                className = str(line).split(' ')[1]
-                if demangle:
-                    out = swiftDemangle(className)
-                    if out != className:
-                        className = out
-                fileName = outputfile + '/' + className + '.h'
-                result = line + '\n'
-                for j in range(i + 1, count):
-                    ll = categares[j]
-                    if ll.startswith('0x'):
-                        break
-                    else:
-                        result += ll + '\n'
-                print(fileName)
-                with open(fileName, mode='w') as f:
-                    f.write(result)
+        if line.startswith('0x'):
+            className = str(line).split(' ')[1]
+            if demangle:
+                out = swiftDemangle(className)
+                if out != className:
+                    className = out
+            fileName = f'{outputfile}/{className}.h'
+            result = line + '\n'
+            for j in range(i + 1, count):
+                ll = categares[j]
+                if ll.startswith('0x'):
+                    break
+                else:
+                    result += ll + '\n'
+            print(fileName)
+            with open(fileName, mode='w') as f:
+                f.write(result)
 
 
 def dumpSwift(inputfile, outputfile, arches, demangle):
-    strline = './dsdump -a '+ arches +' --swift --verbose=5 "' + inputfile + '"'
+    strline = f'./dsdump -a {arches} --swift --verbose=5 "{inputfile}"'
     p = subprocess.Popen(strline, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out = p.communicate()[0].decode('utf-8', 'ignore')
     arr = out.split('\n')
@@ -135,11 +135,11 @@ def dumpSwift(inputfile, outputfile, arches, demangle):
     start = -1
     end = -1
     count = len(arr)
-    for i in range(0, count):
+    for i in range(count):
         line = arr[i].strip()
         if line.startswith('class') or line.startswith('enum') or line.startswith('struct'):
             className = line.split(' ')[1].strip()
-            fileName = outputfile + '/' + className + '.swift'
+            fileName = f'{outputfile}/{className}.swift'
             start = i
             if line.endswith('}'):
                 end = i
@@ -148,15 +148,21 @@ def dumpSwift(inputfile, outputfile, arches, demangle):
         if start != -1 and end != -1:
             print(fileName)
             with open(fileName, mode='a') as f:
-                f.write('\n'.join(arr[start:end+1])+'\n')
+                f.write('\n'.join(arr[start:end + 1]) + '\n')
             start = -1
             end = -1
+
 
 def swiftDemangle(className):
     if className.startswith('_'):
         if '(' in className and ')' in className:
             className = className.split('(')[0]
-        p = subprocess.Popen('xcrun swift-demangle --simplified --compact '+className, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p = subprocess.Popen(
+            f'xcrun swift-demangle --simplified --compact {className}',
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
         out = p.communicate()[0].decode('utf-8', 'ignore').strip()
         if len(out) > 2:
             return out
@@ -164,4 +170,4 @@ def swiftDemangle(className):
 
 
 if __name__ == "__main__":
-   main(sys.argv[1:])
+    main(sys.argv[1:])
